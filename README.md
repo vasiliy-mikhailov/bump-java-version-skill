@@ -27,15 +27,35 @@ Point a tool-using coding agent at the skill and tell it the repo and the hop. I
 
 The skill then triggers automatically when you ask Claude to upgrade or bump a Maven project's Java version.
 
-### Any other agent (opencode, kilocode, OpenHands, Cursor, Codex, Gemini CLI, …)
+### opencode
 
-The skill is a single portable `SKILL.md`. Copy it where your agent reads skills, or reference it from your `AGENTS.md`:
+Reference the skill from your project's `AGENTS.md`, or use a skills plugin such as [opencode-skillful](https://github.com/zenobi-us/opencode-skillful) and drop it into the directory it watches:
+
+```
+cp skills/bump-java-version/SKILL.md <your-project>/.bump-skill/SKILL.md
+echo "Use .bump-skill/SKILL.md to bump this project's Java version." >> <your-project>/AGENTS.md
+```
+
+### OpenHands
+
+Add it as a repository skill (OpenHands reads `.openhands/skills/`), or install it from the public [OpenHands/skills](https://github.com/OpenHands/skills) registry once listed:
+
+```
+mkdir -p <your-project>/.openhands/skills/bump-java-version
+cp skills/bump-java-version/SKILL.md <your-project>/.openhands/skills/bump-java-version/
+```
+
+### Kilo Code
+
+Browse to it under **Marketplace → Skills** in the extension, or drop the skill into your project and point `.kilocode/` at it:
 
 ```
 cp skills/bump-java-version/SKILL.md <your-project>/.bump-skill/SKILL.md
 ```
 
-then prompt:
+### Any other agent (Cursor, Codex, Gemini CLI, …)
+
+The skill is a single portable `SKILL.md` (markdown + YAML frontmatter). Copy it where your agent reads skills, or reference it from your `AGENTS.md`, then prompt:
 
 > Bump this Maven project from Java `<from>` to Java `<to>` by following `.bump-skill/SKILL.md`. Read it first, then carry out its steps yourself.
 
