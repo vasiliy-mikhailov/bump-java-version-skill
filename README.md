@@ -18,18 +18,20 @@ Point a tool-using coding agent at the skill and tell it the repo and the hop. I
 
 ## Install
 
-### Claude Code (plugin)
+### Claude Code
+
+[Claude Code](https://github.com/anthropics/claude-code) — install it as a plugin from this repo's marketplace:
 
 ```
 /plugin marketplace add vasiliy-mikhailov/bump-java-version-skill
 /plugin install bump-java-version
 ```
 
-The skill then triggers automatically when you ask Claude to upgrade or bump a Maven project's Java version.
+It then triggers automatically when you ask Claude to upgrade or bump a Maven project's Java version.
 
 ### opencode
 
-Reference the skill from your project's `AGENTS.md`, or use a skills plugin such as [opencode-skillful](https://github.com/zenobi-us/opencode-skillful) and drop it into the directory it watches:
+[opencode](https://github.com/sst/opencode) reads `AGENTS.md` and supports skills plugins such as [opencode-skillful](https://github.com/zenobi-us/opencode-skillful). Drop the skill in and reference it:
 
 ```
 cp skills/bump-java-version/SKILL.md <your-project>/.bump-skill/SKILL.md
@@ -38,7 +40,7 @@ echo "Use .bump-skill/SKILL.md to bump this project's Java version." >> <your-pr
 
 ### OpenHands
 
-Add it as a repository skill (OpenHands reads `.openhands/skills/`), or install it from the public [OpenHands/skills](https://github.com/OpenHands/skills) registry once listed:
+[OpenHands](https://github.com/OpenHands/OpenHands) loads skills from `.openhands/skills/`, and from the public [extensions registry](https://github.com/OpenHands/extensions) (listing [in review](https://github.com/OpenHands/extensions/pull/311)):
 
 ```
 mkdir -p <your-project>/.openhands/skills/bump-java-version
@@ -47,7 +49,7 @@ cp skills/bump-java-version/SKILL.md <your-project>/.openhands/skills/bump-java-
 
 ### Kilo Code
 
-Browse to it under **Marketplace → Skills** in the extension, or drop the skill into your project and point `.kilocode/` at it:
+[Kilo Code](https://github.com/Kilo-Org/kilocode) installs skills from the [Kilo Marketplace](https://github.com/Kilo-Org/kilo-marketplace) **Skills** tab (listing [in review](https://github.com/Kilo-Org/kilo-marketplace/pull/94)), or drop it in directly:
 
 ```
 cp skills/bump-java-version/SKILL.md <your-project>/.bump-skill/SKILL.md
@@ -55,7 +57,7 @@ cp skills/bump-java-version/SKILL.md <your-project>/.bump-skill/SKILL.md
 
 ### Any other agent (Cursor, Codex, Gemini CLI, …)
 
-The skill is a single portable `SKILL.md` (markdown + YAML frontmatter). Copy it where your agent reads skills, or reference it from your `AGENTS.md`, then prompt:
+The skill is a single portable `SKILL.md` (markdown + YAML frontmatter, [Agent Skills spec](https://agentskills.io/)). Copy it where your agent reads skills, or reference it from your `AGENTS.md`, then prompt:
 
 > Bump this Maven project from Java `<from>` to Java `<to>` by following `.bump-skill/SKILL.md`. Read it first, then carry out its steps yourself.
 
