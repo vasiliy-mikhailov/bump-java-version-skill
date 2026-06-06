@@ -1,0 +1,20 @@
+{
+  "name": "bump-java-version",
+  "owner": {
+    "name": "Vasiliy Mikhailov",
+    "url": "https://github.com/vasiliy-mikhailov"
+  },
+  "metadata": {
+    "description": "A portable Agent Skill that bumps a Maven project one Java LTS step (8->11, 11->17, 17->21, 21->25), conserving previously-passing tests, using only standard tools.",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "bump-java-version",
+      "source": "./",
+      "description": "Migrate a Maven project one Java LTS step (8->11, 11->17, 17->21, 21->25) so it compiles under the new JDK and previously-passing tests still pass — JDKs, Maven, and OpenRewrite recipes from Maven Central only, no project-specific scripts.",
+      "strict": false,
+      "skills": ["./skills/bump-java-version"]
+    }
+  ]
+}
