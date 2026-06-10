@@ -1,13 +1,15 @@
 ---
 name: bump-java-version
-description: Migrate a Maven project from one Java LTS to the next (8->11, 11->17, 17->21, 21->25) so it still compiles under the new JDK and previously-passing tests still pass — by hand, using only standard tools (JDKs, Maven, and OpenRewrite recipes from Maven Central; no project-specific scripts). Use when upgrading or bumping the Java version of a Maven project, modernizing to a newer JDK or LTS, or performing the Spring Boot 1->2 / 2->3 and javax->jakarta migration that a Java upgrade requires.
+description: Migrate a Maven or Gradle project from one Java LTS to the next (8->11, 11->17, 17->21, 21->25) so it still compiles under the new JDK and previously-passing tests still pass — by hand, using only standard tools (JDKs, Maven or Gradle, and OpenRewrite recipes from Maven Central; no project-specific scripts). Use when upgrading or bumping the Java version of a Maven or Gradle project, modernizing to a newer JDK or LTS, or performing the Spring Boot 1->2 / 2->3 and javax->jakarta migration that a Java upgrade requires.
 ---
 
-# Bumping a Maven project one Java LTS step — by hand
+# Bumping a Maven or Gradle project one Java LTS step — by hand
 
 Migrate a Maven project **one** Java LTS step (8→11, 11→17, 17→21, or 21→25) so it **compiles** under the
 new JDK and every test that **passed before still passes**. Uses only standard tools — **JDKs,
-Maven, and OpenRewrite** (recipes pulled from Maven Central). No project-specific scripts.
+Maven, and OpenRewrite** (recipes pulled from Maven Central). No project-specific scripts. **If the
+project is Gradle** (`build.gradle`/`.kts` + `gradlew`, no `pom.xml`), follow **section G** at the end
+instead of the Maven steps §1–§7.
 
 ---
 
@@ -41,8 +43,10 @@ no DB, no network) are **not** your responsibility.
 
 ## 2. Make Lombok safe (if the project uses Lombok)
 
-Lombok **< 1.18.30** crashes `javac` 17/21 (`NoSuchFieldError: JCTree$JCImport.qualid`). Edit the
-pom: set the Lombok version (or the `lombok.version` property) to **1.18.30** or newer. Do this
+Lombok **< 1.18.30** crashes `javac` 17/21 (`NoSuchFieldError: JCTree$JCImport.qualid`); and Lombok
+**< 1.18.40** crashes `javac` **25** (`ExceptionInInitializerError: com.sun.tools.javac.code.TypeTag ::
+UNKNOWN`). Edit the pom: set the Lombok version (or the `lombok.version` property) to **1.18.30+** for
+JDK 17/21, **1.18.40+** for JDK 25 (a project already on 1.18.3x still needs the bump for 25). Do this
 **before** any step under the new JDK.
 
 ---
@@ -161,7 +165,9 @@ This also performs the javax→jakarta and Spring Security 6 migrations.
 | `maven-surefire-plugin:2.20/2.21 … NullPointerException` | surefire ≤ 2.21 broken on JDK 9+ | Force surefire **2.22.2+** (pom version, or `<maven-surefire-plugin.version>2.22.2</…>` if BOM-pinned). |
 | `Cannot define class using reflection` / `sun.misc.Unsafe.defineClass` / `MockitoException` (often then `OutOfMemoryError`) | old Mockito's shaded ByteBuddy uses removed `sun.misc.Unsafe` | Bump **Mockito** (not byte-buddy — it's shaded). Add **before** any BOM import in `<dependencyManagement>`: `org.mockito:mockito-core:2.23.4` + `org.objenesis:objenesis:3.2`. (Match the newest patch if the tests use the Mockito 3/4/5 API.) |
 | `ASM ClassReader failed to parse` / `Unsupported class file major version 61/65/69` | ByteBuddy/ASM too old for JDK 17/21/25 | Light: dM `net.bytebuddy:byte-buddy(:agent):1.14.12` (JDK 17/21; use the newest 2025+ release for JDK 25). If it's Spring's component-scan ASM (Spring 5.2.x / SB 2.0–2.1): do the **SB 2→3** upgrade (§6) instead. |
+| `WARNING: … sun.misc.Unsafe::objectFieldOffset`/`arrayBaseOffset … terminally deprecated` from a dependency (jctools, Netty, …) on JDK 25+ — or an outright failure once a JDK removes it | the dep is built on `sun.misc.Unsafe` (deprecated-for-removal since JDK 23) | **A newer version often does NOT fix it** — jctools 4.0.5 still calls it; verify the *proposed* version on the target JDK before shipping. Prefer an Unsafe-free code path the lib already ships: e.g. jctools `org.jctools.queues.atomic.*` (AtomicFieldUpdater-backed) in place of `org.jctools.queues.*`. If it's only a **warning** and tests still pass, it's cosmetic — conserve, don't force it. |
 | `ArrayIndexOutOfBoundsException: Index 1 out of bounds for length 1` from a `<clinit>` (Jadira; Hibernate Validator 5.x → "Failed to load ApplicationContext") | old lib parses `java.version`/`java.specification.version` as legacy `1.x` | Don't pass `-Djava.version=<major>` (let the JVM report its real version). If it's Hibernate Validator 5.x, bump it (`hibernate-validator` 6.2.5.Final). |
+| `ExceptionInInitializerError: com.sun.tools.javac.code.TypeTag :: UNKNOWN` during compile/testCompile | Lombok too old for the new JDK (esp. **JDK 25**) — a different symptom from the `JCImport.qualid` one, same root cause | Bump `lombok.version`: **1.18.30+** for 17/21, **1.18.40+** for 25. Applies even if the project is already on a 1.18.3x release. |
 | `Error injecting JarArchiver` / `ExceptionInInitializerError at JarArchiver.<init>` | old `maven-jar/war/assembly` plexus-archiver predates JDK 11 | Bump the plugin (`maven-jar-plugin ≥ 3.4.1`) or dM `org.codehaus.plexus:plexus-archiver:4.2.7`. |
 | `com.sun:tools:jar` not found / `tools.jar` systemPath | `tools.jar` removed in JDK 9 | Delete the `com.sun:tools` system-scoped dependency. If code uses `com.sun.tools.javac.*`: add `--add-exports jdk.compiler/com.sun.tools.javac.*=ALL-UNNAMED` to `maven-compiler-plugin` `<compilerArgs>` **and** surefire `<argLine>`, and use `<source>/<target>` (NOT `<release>`). |
 | `no Bean Validation provider could be found` | provider dropped | Add `org.hibernate.validator:hibernate-validator` (6.2.5.Final javax / 8.0.1.Final jakarta). |
@@ -187,3 +193,46 @@ report the failed step + the unresolved `[ERROR]`. Known genuine bails:
 - **Source genuinely uses a removed JDK API** that no recipe can rewrite.
 
 An honest bail with the reason beats a green build that hides a dropped test.
+
+
+---
+
+## G. Gradle projects (`build.gradle` / `build.gradle.kts`) — use *instead of* §1–§7
+
+Same goal — compile under `jv_to` and conserve every previously-passing test — with Gradle tools.
+Detect: a `build.gradle`/`.kts` + `gradlew` at the root and **no `pom.xml`**.
+
+1. **Baseline:** `JAVA_HOME=<jdk_from> ./gradlew test`. Read `build/test-results/test/TEST-*.xml`; the
+   0-failure tests are your conserve set. Always use the repo's `./gradlew`, never a system `gradle`. The declared toolchain/`languageVersion` is the *bytecode target*, **not** necessarily the JDK the build runs on — a codegen tool (e.g. ANTLR) can demand a higher JDK than the toolchain says (a project declaring `of(8)` may actually need JDK 11+ to build). Trust what compiles, not the number; that real floor is your true `jv_from`.
+2. **Set the Java version to `jv_to`** in the build script: the toolchain
+   `java { toolchain { languageVersion = JavaLanguageVersion.of(<jv_to>) } }`, or
+   `sourceCompatibility`/`targetCompatibility`/`options.release`, or for Kotlin `kotlin { jvmToolchain(<jv_to>) }`.
+   Often this single change is the whole bump (verified: a Spring Boot 2.7 / Gradle 8.10 project went
+   11→17 with only the toolchain edit).
+3. **Bump the Gradle wrapper if it predates `jv_to` — the #1 Gradle wall:** JDK 17 needs Gradle ≥ 7.3,
+   JDK 21 ≥ 8.5, JDK 25 ≥ 9.0 — Gradle 8.x can't even *run* a JDK-25 toolchain (it fails parsing the version string), so ≥ 9.0 is required to build/test **on** 25, not just to emit 25 bytecode. `./gradlew wrapper --gradle-version <X>` (run it under the OLD JDK if the
+   current wrapper won't even start on `jv_to`).
+4. **Lombok:** same floors as §2 (Maven) — set the Lombok dependency / `lombok.version` to **1.18.30+**
+   for 17/21, **1.18.40+** for 25.
+5. **If step 2 still doesn't compile, run the SAME OpenRewrite recipes via the `rewrite-gradle-plugin`
+   init-script** (no build edits; verified end-to-end):
+   ```bash
+   cat > /tmp/rw.init.gradle <<'G2'
+   initscript {
+     repositories { gradlePluginPortal(); mavenCentral() }
+     dependencies { classpath("org.openrewrite:plugin:latest.release") }
+   }
+   rootProject {
+     apply plugin: org.openrewrite.gradle.RewritePlugin
+     dependencies { rewrite("org.openrewrite.recipe:rewrite-migrate-java:latest.release") }
+     rewrite { activeRecipe("org.openrewrite.java.migrate.UpgradeToJava17") }   // or UpgradeBuildToJava21 / UpgradeBuildToJava25
+   }
+   G2
+   JAVA_HOME=<jdk_to> ./gradlew --no-daemon --init-script /tmp/rw.init.gradle rewriteRun
+   ```
+6. **Conserve:** `JAVA_HOME=<jdk_to> ./gradlew test` — the conserve set ⊆ post-pass.
+
+The Spring Boot upgrades (§6) and the Troubleshooting table (§7) apply the same; Gradle equivalents:
+extra deps go in `dependencies {}`, and test-JVM `--add-opens` go in `tasks.test { jvmArgs("--add-opens=...") }`.
+
+**Kotlin coexistence:** if the project also has Kotlin (`compileKotlin` task / `kotlin {}` plugin), set the **Kotlin** JVM target too — `kotlin { jvmToolchain(<jv_to>) }`, not just the Java toolchain — or Gradle fails with *"Inconsistent JVM-target compatibility detected for tasks 'compileJava' (N) and 'compileKotlin' (M)"*. JVM target **25 needs Kotlin ≥ 2.2** (older Kotlin caps at JVM 21/22); in **Quarkus** the Kotlin version is pinned by the platform BOM, so bump the **Quarkus platform**, not Kotlin directly (a raw Kotlin bump is overridden).

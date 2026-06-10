@@ -1,12 +1,12 @@
 {
   "name": "bump-java-version",
-  "version": "1.1.0",
-  "description": "Migrate a Maven project one Java LTS step (8->11, 11->17, 17->21, 21->25) so it compiles under the new JDK and previously-passing tests still pass — standard tools only (JDKs, Maven, OpenRewrite from Maven Central).",
+  "version": "1.2.0",
+  "description": "Migrate a Maven or Gradle project one Java LTS step (8->11, 11->17, 17->21, 21->25) so it compiles under the new JDK and previously-passing tests still pass — standard tools only (JDKs, Maven or Gradle, OpenRewrite from Maven Central).",
   "author": {
     "name": "Vasiliy Mikhailov",
     "url": "https://github.com/vasiliy-mikhailov"
   },
   "license": "MIT",
   "homepage": "https://github.com/vasiliy-mikhailov/bump-java-version-skill",
-  "keywords": ["java", "maven", "migration", "openrewrite", "jdk", "lts", "upgrade", "spring-boot", "jakarta"]
+  "keywords": ["java", "maven", "gradle", "kotlin", "migration", "openrewrite", "jdk", "lts", "upgrade", "spring-boot", "jakarta"]
 }

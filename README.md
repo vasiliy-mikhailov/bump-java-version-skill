@@ -1,6 +1,6 @@
 # bump-java-version
 
-An [Agent Skill](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview) that upgrades a Maven project **one Java LTS step** (8→11, 11→17, 17→21, 21→25) so it **compiles under the new JDK** and **every test that passed before still passes** — using only standard tools (JDKs, Maven, and OpenRewrite recipes from Maven Central). No project-specific scripts: the skill is a hand manual your coding agent reads and follows.
+An [Agent Skill](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview) that upgrades a Maven **or Gradle** project **one Java LTS step** (8→11, 11→17, 17→21, 21→25) so it **compiles under the new JDK** and **every test that passed before still passes** — using only standard tools (JDKs, Maven or Gradle, and OpenRewrite recipes from Maven Central). No project-specific scripts: the skill is a hand manual your coding agent reads and follows.
 
 ## What it does
 
@@ -27,7 +27,7 @@ Point a tool-using coding agent at the skill and tell it the repo and the hop. I
 /plugin install bump-java-version
 ```
 
-It then triggers automatically when you ask Claude to upgrade or bump a Maven project's Java version.
+It then triggers automatically when you ask Claude to upgrade or bump a Maven or Gradle project's Java version.
 
 ### opencode
 
@@ -59,12 +59,12 @@ cp skills/bump-java-version/SKILL.md <your-project>/.bump-skill/SKILL.md
 
 The skill is a single portable `SKILL.md` (markdown + YAML frontmatter, [Agent Skills spec](https://agentskills.io/)). Copy it where your agent reads skills, or reference it from your `AGENTS.md`, then prompt:
 
-> Bump this Maven project from Java `<from>` to Java `<to>` by following `.bump-skill/SKILL.md`. Read it first, then carry out its steps yourself.
+> Bump this Maven or Gradle project from Java `<from>` to Java `<to>` by following `.bump-skill/SKILL.md`. Read it first, then carry out its steps yourself.
 
 ## Requirements
 
 - The two JDKs for the hop (e.g. JDK 17 **and** 21 for a 17→21 bump), selectable via `JAVA_HOME`.
-- Maven (`mvn` or the project's `./mvnw`).
+- Maven (`mvn` or the project's `./mvnw`) **or** Gradle (the project's `./gradlew`) — the skill auto-detects which (`pom.xml` → Maven, else `build.gradle`/`.kts` → Gradle, see SKILL.md §G).
 - Network access to Maven Central (for the OpenRewrite recipes and any new dependencies).
 
 ## Why it's reliable
