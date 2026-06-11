@@ -192,6 +192,10 @@ Full upgrades — do them only if §7 sends you here, then re-run §3–§5.
   5.x/7.x fails with a cryptic `ReplaceStringLiteralValue … is required` NPE, see §7):
   - **SB 1.x → 2.7** (1.x can't run on JDK 11) — run under the OLD JDK, recipe
     `org.openrewrite.java.spring.boot2.UpgradeSpringBoot_2_7`.
+  - **SB 2.0–2.4 → 2.7** (Java 17: Spring below 5.3 component-scans with an ASM that can't read v61
+    bytecode — the `Unsupported class file major version 61` error) — SAME recipe `UpgradeSpringBoot_2_7`
+    (it upgrades any 1.x/2.x). Do **not** hand-pick an intermediate version: anything below SB 2.5
+    (Spring 5.3) fails with the *identical* ASM error, which falsely reads as "the bump didn't help".
   - **SB 2.x → 3.3** (SB2 BOM too old for JDK 21 / ASM, or Spring Security 6 needed) — recipe
     `org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3` (also does javax→jakarta + Security 6).
 - **Gradle** — bump the Spring Boot plugin version (`id 'org.springframework.boot' version '<new>'`).

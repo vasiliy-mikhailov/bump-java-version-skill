@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "A portable Agent Skill that bumps a Maven or Gradle project one Java LTS step (8->11, 11->17, 17->21, 21->25), conserving previously-passing tests, using only standard tools.",
-    "version": "1.5.1"
+    "version": "1.5.2"
   },
   "plugins": [
     {
