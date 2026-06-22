@@ -5,16 +5,22 @@
     "url": "https://github.com/vasiliy-mikhailov"
   },
   "metadata": {
-    "description": "A portable Agent Skill that bumps a Maven or Gradle project one Java LTS step (8->11, 11->17, 17->21, 21->25), conserving previously-passing tests, using only standard tools.",
-    "version": "1.6.1"
+    "description": "Portable Agent Skills that bump a Maven or Gradle project one Java LTS step (8->11, 11->17, 17->21, 21->25), conserving previously-passing tests, using only standard tools. A detect-java-version router reads the real bytecode target and dispatches to the right per-hop skill.",
+    "version": "2.0.0"
   },
   "plugins": [
     {
       "name": "bump-java-version",
       "source": "./",
-      "description": "Migrate a Maven or Gradle project one Java LTS step (8->11, 11->17, 17->21, 21->25) so it compiles under the new JDK and previously-passing tests still pass — JDKs, Maven or Gradle, and OpenRewrite recipes from Maven Central only, no project-specific scripts.",
+      "description": "Detect a project's real Java level and migrate it one Java LTS step (8->11, 11->17, 17->21, 21->25) so it compiles under the new JDK and previously-passing tests still pass -- JDKs, Maven or Gradle, and OpenRewrite recipes from Maven Central only; no project-specific scripts.",
       "strict": false,
-      "skills": ["./skills/bump-java-version"]
+      "skills": [
+        "./skills/detect-java-version",
+        "./skills/bump-java-8-to-11",
+        "./skills/bump-java-11-to-17",
+        "./skills/bump-java-17-to-21",
+        "./skills/bump-java-21-to-25"
+      ]
     }
   ]
 }
