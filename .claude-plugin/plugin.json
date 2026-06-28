@@ -1,6 +1,6 @@
 {
   "name": "bump-java-version",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Migrate a Maven or Gradle project one Java LTS step (8->11, 11->17, 17->21, 21->25) so it compiles under the new JDK and previously-passing tests still pass \u2014 standard tools only (JDKs, Maven or Gradle, OpenRewrite from Maven Central).",
   "author": {
     "name": "Vasiliy Mikhailov",
